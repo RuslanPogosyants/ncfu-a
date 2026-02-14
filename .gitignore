@@ -1,0 +1,28 @@
+# Секреты и окружение
+.env
+
+# База данных
+*.db
+*.db-shm
+*.db-wal
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+*.egg-info/
+dist/
+build/
+
+# Модели dlib (тяжёлые бинарные файлы)
+*.dat
+
+# Данные приложения
+data/
+
+# IDE
+.idea/
+.vscode/
+*.swp
