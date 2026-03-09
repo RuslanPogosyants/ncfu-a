@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NCFU A - Система учёта посещаемости</title>
+    <link rel="stylesheet" href="/static/global.css">
+    <style>
+        /* Hero Section (технический стиль) */
+        .hero {
+            min-height: 100vh;
+            background: var(--gray-100);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-bottom: 4px solid var(--primary);
+        }
+
+        .hero-content {
+            text-align: left;
+            color: var(--text-primary);
+            max-width: 900px;
+            padding: var(--spacing-2xl);
+        }
+
+        .hero-label {
+            font-family: var(--font-family-mono);
+            font-size: var(--font-size-xs);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: var(--spacing-md);
+            color: var(--text-tertiary);
+        }
+
+        .hero-title {
+            font-size: clamp(28px, 5vw, 48px);
+            font-weight: var(--font-weight-bold);
+            margin-bottom: var(--spacing-md);
+            line-height: 1.2;
+            letter-spacing: -0.5px;
+        }
+
+        .hero-subtitle {
+            font-size: clamp(14px, 2.5vw, 18px);
+            margin-bottom: var(--spacing-xl);
+            color: var(--text-secondary);
+            font-weight: var(--font-weight-normal);
+            line-height: 1.5;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: var(--spacing-md);
+            flex-wrap: wrap;
+        }
+
+        .btn-hero {
+            padding: 12px 24px;
+            font-size: var(--font-size-base);
+            border-radius: var(--border-radius);
+            font-weight: var(--font-weight-semibold);
+            transition: all 100ms ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            border: 1px solid;
+        }
+
+        .btn-hero-primary {
+            background: var(--primary);
+            color: var(--text-inverse);
+            border-color: var(--primary);
+        }
+
+        .btn-hero-primary:hover {
+            background: var(--primary-light);
+            border-color: var(--primary-light);
+        }
+
+        .btn-hero-secondary {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border-color: var(--border-color-dark);
+        }
+
+        .btn-hero-secondary:hover {
+            background: var(--gray-200);
+            border-color: var(--gray-600);
+        }
+
+        /* CTA Section (строгий стиль) */
+        .cta {
+            background: var(--gray-900);
+            padding: var(--spacing-2xl) var(--spacing-lg);
+            text-align: center;
+            color: white;
+            border-top: 4px solid var(--primary);
+        }
+
+        .cta-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .cta-title {
+            font-size: var(--font-size-2xl);
+            margin-bottom: var(--spacing-md);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .cta-description {
+            font-size: var(--font-size-base);
+            margin-bottom: var(--spacing-xl);
+            color: var(--gray-400);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero-content {
+                padding: var(--spacing-lg);
+            }
+
+            .hero-buttons {
+                flex-direction: column;
+            }
+
+            .btn-hero {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* Demo Badge (строгий стиль) */
+        .demo-badge {
+            position: fixed;
+            top: 16px;
+            right: 16px;
+            background: var(--warning);
+            color: var(--primary);
+            padding: 6px 12px;
+            border-radius: var(--border-radius);
+            font-size: var(--font-size-xs);
+            font-weight: var(--font-weight-bold);
+            z-index: 100;
+            border: 2px solid var(--primary);
+            font-family: var(--font-family-mono);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Demo Badge -->
+    <div class="demo-badge">DEMO</div>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <div class="hero-label">v1.0 // Attendance Tracking System</div>
+            <h1 class="hero-title">NCFU A: Автоматизированная система учёта посещаемости</h1>
+            <p class="hero-subtitle">
+                Интеллектуальная система с поддержкой биометрической идентификации:<br>
+                <strong>• Распознавание по фото</strong> — групповое фото вместо переклички, обработка за 3 секунды<br>
+                <strong>• Отпечаток пальца</strong> — автоматическая отметка через сканер AS608 на базе ESP32
+            </p>
+            <div class="hero-buttons">
+                <a href="/login" class="btn-hero btn-hero-primary">
+                    Войти
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta">
+        <div class="cta-container">
+            <h2 class="cta-title">Get Started</h2>
+            <p class="cta-description">
+                Система учёта посещаемости NCFU A с биометрической идентификацией.
+                Face Recognition + Fingerprint Scanner + ESP32.
+            </p>
+            <a href="/login" class="btn-hero btn-hero-primary">
+                LOGIN TO SYSTEM
+            </a>
+            <p style="margin-top: var(--spacing-lg); font-size: var(--font-size-xs); color: var(--gray-500); font-family: var(--font-family-mono);">
+                TEST ACCOUNTS: admin/admin123 | ivanov/teacher123
+            </p>
+        </div>
+    </section>
+</body>
+</html>

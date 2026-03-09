@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Панель администратора</title>
+    <link rel="stylesheet" href="/static/global.css">
+    <style>
+        body {
+            background: var(--bg-primary);
+            padding: var(--spacing-lg);
+        }
+
+        .header {
+            background: var(--bg-secondary);
+            padding: var(--spacing-lg);
+            border-radius: var(--border-radius);
+            border: 1px solid var(--border-color);
+            margin-bottom: var(--spacing-lg);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            color: var(--text-primary);
+            font-size: var(--font-size-xl);
+            font-family: var(--font-family-mono);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: var(--font-weight-bold);
+            margin: 0;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+            font-size: var(--font-size-sm);
+        }
+
+        .logout-btn {
+            padding: 8px 16px;
+            background: var(--error);
+            color: var(--text-inverse);
+            border: 1px solid var(--error);
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: var(--font-size-base);
+            font-weight: var(--font-weight-semibold);
+            transition: all 100ms ease;
+        }
+
+        .logout-btn:hover {
+            background: #bb0000;
+            border-color: #bb0000;
+        }
+
+        .tabs {
+            background: var(--bg-secondary);
+            padding: 0;
+            border-radius: var(--border-radius);
+            border: 1px solid var(--border-color);
+            margin-bottom: var(--spacing-lg);
+            overflow: hidden;
+        }
+
+        .tab-buttons {
+            display: flex;
+            background: var(--gray-100);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: var(--spacing-md);
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: var(--font-size-base);
+            font-weight: var(--font-weight-semibold);
+            color: var(--text-secondary);
+            transition: all 100ms ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .tab-btn.active {
+            background: var(--bg-secondary);
+            color: var(--primary);
+            border-bottom: 2px solid var(--primary);
+        }
+
+        .tab-btn:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .tab-content {
+            display: none;
+            padding: var(--spacing-lg);
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .tab-content h2 {
+            color: var(--text-primary);
+            font-size: var(--font-size-lg);
+            margin-bottom: var(--spacing-md);
+            font-family: var(--font-family-mono);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: var(--font-weight-bold);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .filters-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--spacing-md);
+            margin: var(--spacing-md) 0;
+            align-items: flex-end;
+        }
+
+        .filters-row .form-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .filters-actions {
+            display: flex;
+            gap: var(--spacing-sm);
+        }
+
+        .pagination-controls {
+            display: flex;
+            gap: var(--spacing-sm);
+            align-items: center;
+            justify-content: flex-end;
+            margin: var(--spacing-sm) 0 var(--spacing-lg);
+            font-size: var(--font-size-sm);
+        }
+
+        .pagination-controls span {
+            font-weight: var(--font-weight-semibold);
+            color: var(--text-secondary);
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            margin-bottom: var(--spacing-xs);
+            color: var(--text-secondary);
+            font-weight: var(--font-weight-semibold);
+            font-size: var(--font-size-xs);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        input, select, textarea {
+            padding: 8px 10px;
+            border: 1px solid var(--border-color-dark);
+            border-radius: var(--border-radius);
+            font-size: var(--font-size-base);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            transition: all 100ms ease;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: var(--bg-secondary);
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: 1px solid var(--border-color-dark);
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: var(--font-size-base);
+            font-weight: var(--font-weight-semibold);
+            transition: all 100ms ease;
+            margin-bottom: var(--spacing-lg);
+            display: inline-block;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: var(--text-inverse);
+            border-color: var(--primary);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-light);
+            border-color: var(--primary-light);
+        }
+
+        .btn-danger {
+            background: var(--error);
+            color: var(--text-inverse);
+            border-color: var(--error);
+        }
+
+        .btn-danger:hover {
+            background: #bb0000;
+            border-color: #bb0000;
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: var(--text-inverse);
+            border-color: var(--success);
+        }
+
+        .btn-success:hover {
+            background: #008800;
+            border-color: #008800;
+        }
+
+        .list-container {
+            margin-top: var(--spacing-lg);
+            padding-bottom: var(--spacing-lg);
+        }
+
+        .list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--spacing-md);
+            margin-bottom: var(--spacing-sm);
+            border-bottom: 1px solid var(--border-color);
+            transition: background 100ms ease;
+            gap: var(--spacing-md);
+        }
+
+        .list-item:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .list-item:last-child {
+            border-bottom: none;
+        }
+
+        .badge {
+            padding: 4px 8px;
+            border-radius: var(--border-radius);
+            font-size: var(--font-size-xs);
+            font-weight: var(--font-weight-semibold);
+            border: 1px solid;
+        }
+
+        .badge-blue {
+            background: var(--info-light);
+            color: var(--info);
+            border-color: var(--info);
+        }
+
+        .badge-green {
+            background: var(--success-light);
+            color: var(--success);
+            border-color: var(--success);
+        }
+
+        .badge-purple {
+            background: var(--info-light);
+            color: var(--info);
+            border-color: var(--info);
+        }
+
+        .badge-success {
+            background: var(--success-light);
+            color: var(--success);
+            border-color: var(--success);
+            font-weight: var(--font-weight-bold);
+        }
+
+        .badge-warning {
+            background: var(--warning-light);
+            color: var(--warning);
+            border-color: var(--warning);
+            font-weight: var(--font-weight-bold);
+        }
+
+        .schedule-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: var(--spacing-sm);
+            margin-top: var(--spacing-lg);
+        }
+
+        .day-column {
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: var(--spacing-sm);
+            background: var(--bg-tertiary);
+        }
+
+        .day-header {
+            font-weight: var(--font-weight-bold);
+            text-align: center;
+            padding: var(--spacing-xs);
+            background: var(--primary);
+            color: var(--text-inverse);
+            border-radius: var(--border-radius);
+            margin-bottom: var(--spacing-sm);
+            font-size: var(--font-size-xs);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .lesson-card {
+            background: var(--bg-secondary);
+            padding: var(--spacing-xs);
+            margin-bottom: var(--spacing-xs);
+            border-radius: var(--border-radius);
+            border-left: 2px solid var(--primary);
+            border: 1px solid var(--border-color);
+            font-size: var(--font-size-xs);
+        }
+
+        .lesson-card > div {
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .lesson-time {
+            font-weight: var(--font-weight-bold);
+            color: var(--primary);
+            font-family: var(--font-family-mono);
+        }
+
+        .week-selector {
+            display: flex;
+            gap: var(--spacing-sm);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .week-btn {
+            flex: 1;
+            padding: var(--spacing-sm);
+            border: 1px solid var(--border-color-dark);
+            background: var(--bg-secondary);
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: var(--font-size-base);
+            transition: all 100ms ease;
+            font-weight: var(--font-weight-semibold);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .week-btn.active {
+            border-color: var(--primary);
+            background: var(--primary);
+            color: var(--text-inverse);
+        }
+
+        .reports-card {
+            margin-top: var(--spacing-2xl);
+            padding: var(--spacing-lg);
+            background: var(--bg-secondary);
+            border-radius: var(--border-radius);
+            border: 1px solid var(--border-color);
+        }
+
+        .reports-card h3 {
+            margin-bottom: var(--spacing-md);
+            font-family: var(--font-family-mono);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: var(--font-weight-bold);
+        }
+
+        .reports-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--spacing-sm);
+            margin-top: var(--spacing-sm);
+        }
+
+        .summary-card {
+            margin-top: var(--spacing-md);
+            padding: var(--spacing-md);
+            background: var(--bg-tertiary);
+            border-radius: var(--border-radius);
+            border: 1px solid var(--border-color);
+            display: none;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: var(--spacing-sm);
+            margin-top: var(--spacing-md);
+        }
+
+        .summary-item {
+            background: var(--bg-secondary);
+            border-radius: var(--border-radius);
+            border: 1px solid var(--border-color);
+            padding: var(--spacing-md);
+            text-align: center;
+        }
+
+        .summary-item strong {
+            display: block;
+            font-size: var(--font-size-lg);
+            color: var(--text-primary);
+            font-family: var(--font-family-mono);
+        }
+
+        .empty-day {
+            font-size: var(--font-size-xs);
+            color: var(--text-tertiary);
+            text-align: center;
+            padding: var(--spacing-xs) 0;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--bg-primary);
+            padding: var(--spacing-2xl);
+            border-radius: var(--border-radius);
+            border: 1px solid var(--border-color);
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-content form {
+            margin-top: var(--spacing-lg);
+        }
+
+        .modal-content .form-group {
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-lg);
+            padding-bottom: var(--spacing-md);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-family: var(--font-family-mono);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: var(--font-weight-bold);
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: var(--font-size-2xl);
+            cursor: pointer;
+            color: var(--text-tertiary);
+            font-weight: var(--font-weight-bold);
+            transition: all 100ms ease;
+        }
+
+        .close-btn:hover {
+            color: var(--text-primary);
+        }
+
+        .alert {
+            padding: var(--spacing-md);
+            border-radius: var(--border-radius);
+            margin-bottom: var(--spacing-md);
+            border: 1px solid;
+        }
+
+        .alert-success {
+            background: var(--success-light);
+            color: var(--success);
+            border-color: var(--success);
+        }
+
+        .alert-error {
+            background: var(--error-light);
+            color: var(--error);
+            border-color: var(--error);
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Панель администратора</h1>
+        <div class="user-info">
+            <span id="userName">Loading...</span>
+            <button class="logout-btn" onclick="window.location.href='/journal'" style="background: var(--primary); border-color: var(--primary); margin-right: var(--spacing-sm);">Журнал</button>
+            <button class="logout-btn" onclick="logout()">Выход</button>
+        </div>
+    </div>
+
+    <div class="tabs">
+        <div class="tab-buttons">
+            <button class="tab-btn active" onclick="switchTab('students')">Студенты</button>
+            <button class="tab-btn" onclick="switchTab('groups')">Группы</button>
+            <button class="tab-btn" onclick="switchTab('disciplines')">Дисциплины</button>
+            <button class="tab-btn" onclick="switchTab('semesters')">Семестры</button>
+            <button class="tab-btn" onclick="switchTab('schedule')">Расписание</button>
+        </div>
+
+        <!-- Students Tab -->
+        <div id="students" class="tab-content active">
+            <h2>Управление студентами</h2>
+            <button class="btn btn-primary" onclick="openStudentModal()">Добавить студента</button>
+            <div class="filters-row">
+                <div class="form-group">
+                    <label>Поиск по имени</label>
+                    <input type="text" id="studentSearchInput" placeholder="Введите имя">
+                </div>
+                <div class="form-group">
+                    <label>Фильтр по группе</label>
+                    <select id="studentGroupFilter">
+                        <option value="">Все группы</option>
+                    </select>
+                </div>
+                <div class="filters-actions">
+                    <button class="btn btn-primary" onclick="applyStudentFilters()">Применить</button>
+                    <button class="btn" onclick="resetStudentFilters()">Сбросить</button>
+                </div>
+            </div>
+            <div class="list-container" id="studentsList"></div>
+            <div class="pagination-controls">
+                <button class="btn btn-primary" id="studentsPrevBtn" onclick="changeStudentsPage(-1)">Назад</button>
+                <span id="studentsPageInfo">Страница 1 из 1</span>
+                <button class="btn btn-primary" id="studentsNextBtn" onclick="changeStudentsPage(1)">Вперед</button>
+            </div>
+        </div>
+
+        <!-- Groups Tab -->
+        <div id="groups" class="tab-content">
+            <h2>Управление группами</h2>
+            <button class="btn btn-primary" onclick="openGroupModal()">Добавить группу</button>
+            <div class="list-container" id="groupsList"></div>
+        </div>
+
+        <!-- Disciplines Tab -->
+        <div id="disciplines" class="tab-content">
+            <h2>Управление дисциплинами</h2>
+            <button class="btn btn-primary" onclick="openDisciplineModal()">Добавить дисциплину</button>
+            <div class="list-container" id="disciplinesList"></div>
+        </div>
+
+        <!-- Semesters Tab -->
+        <div id="semesters" class="tab-content">
+            <h2>Управление семестрами</h2>
+            <button class="btn btn-primary" onclick="openSemesterModal()">Добавить семестр</button>
+            <div class="list-container" id="semestersList"></div>
+        </div>
+
+
+        <!-- Schedule Tab -->
+        <div id="schedule" class="tab-content">
+            <h2>Шаблоны расписания</h2>
+            <button class="btn btn-primary" onclick="openScheduleModal()">Добавить занятие</button>
+
+            <div class="week-selector">
+                <button class="week-btn active" onclick="selectWeek('odd', this)">Нечетная неделя</button>
+                <button class="week-btn" onclick="selectWeek('even', this)">Четная неделя</button>
+                <button class="week-btn" onclick="selectWeek('both', this)">Обе недели</button>
+            </div>
+
+            <div class="filters-row">
+                <div class="form-group">
+                    <label>Дисциплина</label>
+                    <select id="scheduleFilterDiscipline">
+                        <option value="">Все дисциплины</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Преподаватель</label>
+                    <select id="scheduleFilterTeacher">
+                        <option value="">Все преподаватели</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Группа</label>
+                    <select id="scheduleFilterGroup">
+                        <option value="">Все группы</option>
+                    </select>
+                </div>
+                <div class="filters-actions">
+                    <button class="btn btn-primary" onclick="applyScheduleFilters()">Применить</button>
+                    <button class="btn" onclick="resetScheduleFilters()">Сбросить</button>
+                </div>
+            </div>
+
+            <div class="schedule-grid" id="scheduleGrid"></div>
+
+            <div class="pagination-controls">
+                <button class="btn btn-primary" id="schedulePrevBtn" onclick="changeSchedulePage(-1)">Назад</button>
+                <span id="schedulePageInfo">Страница 1 из 1</span>
+                <button class="btn btn-primary" id="scheduleNextBtn" onclick="changeSchedulePage(1)">Вперед</button>
+            </div>
+
+            <div class="reports-card">
+                <h3>Отчеты</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Группа</label>
+                        <select id="reportGroupSelect">
+                            <option value="">Выберите группу</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Дисциплина</label>
+                        <select id="reportDisciplineSelect">
+                            <option value="">Все дисциплины</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Дата с</label>
+                        <input type="date" id="reportDateFrom">
+                    </div>
+                    <div class="form-group">
+                        <label>Дата по</label>
+                        <input type="date" id="reportDateTo">
+                    </div>
+                    <div class="form-group">
+                        <label>Формат</label>
+                        <select id="reportFormatSelect">
+                            <option value="csv">CSV</option>
+                            <option value="xlsx">Excel</option>
+                            <option value="json">JSON</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="reports-actions">
+                    <button class="btn btn-primary" onclick="downloadJournalReport()">Скачать</button>
+                    <button class="btn btn-success" onclick="showSummaryReport()">Показать сводку</button>
+                </div>
+                <div id="summaryReportContainer" class="summary-card"></div>
+            </div>
+
+            <div style="margin-top: 20px;">
+                <button class="btn btn-success" onclick="generateInstances()">Сгенерировать занятия</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Student Modal -->
+    <div id="studentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Добавить студента</h2>
+                <button class="close-btn" onclick="closeModal('studentModal')">×</button>
+            </div>
+            <div id="studentAlert"></div>
+            <form id="studentForm">
+                <div class="form-group">
+                    <label>Имя студента</label>
+                    <input type="text" id="studentName" required>
+                </div>
+                <div class="form-group">
+                    <label>Группа</label>
+                    <select id="studentGroup" required></select>
+                </div>
+                <button type="submit" class="btn btn-primary">Добавить</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Group Modal -->
+    <div id="groupModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Добавить группу</h2>
+                <button class="close-btn" onclick="closeModal('groupModal')">×</button>
+            </div>
+            <div id="groupAlert"></div>
+            <form id="groupForm">
+                <div class="form-group">
+                    <label>Название группы</label>
+                    <input type="text" id="groupName" placeholder="например, ИВТ-301" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Добавить</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Discipline Modal -->
+    <div id="disciplineModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Добавить дисциплину</h2>
+                <button class="close-btn" onclick="closeModal('disciplineModal')">×</button>
+            </div>
+            <div id="disciplineAlert"></div>
+            <form id="disciplineForm">
+                <div class="form-group">
+                    <label>Название дисциплины</label>
+                    <input type="text" id="disciplineName" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Добавить</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Semester Modal -->
+    <div id="semesterModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Добавить семестр</h2>
+                <button class="close-btn" onclick="closeModal('semesterModal')">×</button>
+            </div>
+            <div id="semesterAlert"></div>
+            <form id="semesterForm">
+                <div class="form-group">
+                    <label>Название семестра</label>
+                    <input type="text" id="semesterName" placeholder="например, Осень 2025" required>
+                </div>
+                <div class="form-group">
+                    <label>Дата начала</label>
+                    <input type="date" id="semesterStartDate" required>
+                </div>
+                <div class="form-group">
+                    <label>Дата окончания</label>
+                    <input type="date" id="semesterEndDate" required>
+                </div>
+                <div class="form-group">
+                    <label style="display: flex; align-items: center; gap: 8px;">
+                        <input type="checkbox" id="semesterIsActive" style="width: auto;">
+                        Сделать активным семестром
+                    </label>
+                </div>
+                <button type="submit" class="btn btn-primary">Добавить</button>
+            </form>
+        </div>
+    </div>
+
+
+    <!-- Schedule Modal -->
+    <div id="scheduleModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Добавить занятие</h2>
+                <button class="close-btn" onclick="closeModal('scheduleModal')">×</button>
+            </div>
+            <div id="scheduleAlert"></div>
+            <form id="scheduleForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Дисциплина</label>
+                        <select id="scheduleDiscipline" required></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Преподаватель</label>
+                        <select id="scheduleTeacher" required></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Тип занятия</label>
+                        <select id="scheduleType" required>
+                            <option value="Л">Лекция</option>
+                            <option value="С">Семинар</option>
+                            <option value="ЛР">Лабораторная</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Аудитория</label>
+                        <input type="text" id="scheduleClassroom" required>
+                    </div>
+                    <div class="form-group">
+                        <label>День недели</label>
+                        <select id="scheduleDayOfWeek" required>
+                            <option value="0">Понедельник</option>
+                            <option value="1">Вторник</option>
+                            <option value="2">Среда</option>
+                            <option value="3">Четверг</option>
+                            <option value="4">Пятница</option>
+                            <option value="5">Суббота</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Тип недели</label>
+                        <select id="scheduleWeekType" required>
+                            <option value="both">Обе недели</option>
+                            <option value="odd">Нечетная</option>
+                            <option value="even">Четная</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Время начала</label>
+                        <input type="time" id="scheduleTimeStart" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Время окончания</label>
+                        <input type="time" id="scheduleTimeEnd" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Группы (множественный выбор)</label>
+                    <select id="scheduleGroups" multiple required style="height: 120px;"></select>
+                </div>
+                <button type="submit" class="btn btn-primary">Добавить занятие</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Upload Face Modal -->
+    <div id="uploadFaceModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Загрузить фото студента</h2>
+                <button class="close-btn" onclick="closeModal('uploadFaceModal')">×</button>
+            </div>
+            <p style="margin-bottom: 15px; color: #666;">
+                Студент: <strong id="faceStudentName"></strong>
+            </p>
+            <div class="form-group">
+                <label>Выберите фото студента</label>
+                <input type="file" id="faceFileInput" accept="image/*" style="margin-bottom: 15px;">
+                <p style="font-size: 12px; color: #999; margin-top: 5px;">
+                    Требования: четкое фото лица анфас, хорошее освещение, один человек на фото
+                </p>
+            </div>
+            <div style="text-align: center; margin: 20px 0;">
+                <img id="facePreview" style="max-width: 100%; max-height: 300px; border-radius: 8px; display: none;" alt="Предпросмотр">
+            </div>
+            <button id="uploadFaceBtn" class="btn btn-primary" onclick="uploadStudentFace()" disabled>
+                Загрузить
+            </button>
+        </div>
+    </div>
+
+    <!-- Fingerprint Modal -->
+    <div id="fingerprintModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Регистрация отпечатка пальца</h2>
+                <button class="close-btn" onclick="closeModal('fingerprintModal')">×</button>
+            </div>
+            <p style="margin-bottom: 15px; color: var(--text-secondary);">
+                Студент: <strong id="fingerprintStudentName" style="color: var(--text-primary);"></strong>
+            </p>
+            <p style="margin-bottom: 15px; color: var(--text-secondary);">
+                ID студента: <strong id="fingerprintStudentId" style="color: var(--primary); font-family: var(--font-family-mono);"></strong>
+            </p>
+
+            <div style="background: var(--bg-tertiary); padding: var(--spacing-lg); border-radius: var(--border-radius); margin: var(--spacing-lg) 0; border: 1px solid var(--border-color);">
+                <h3 style="margin: 0 0 var(--spacing-md) 0; font-size: var(--font-size-md); color: var(--text-primary);">Инструкция:</h3>
+                <ol style="margin: 0; padding-left: var(--spacing-lg); color: var(--text-secondary); line-height: 1.6;">
+                    <li>Убедитесь, что ESP32 устройство подключено и работает</li>
+                    <li>Нажмите кнопку регистрации на ESP32 устройстве</li>
+                    <li>ESP32 автоматически получит ID студента: <strong id="fingerprintStudentIdDisplay" style="color: var(--primary);"></strong></li>
+                    <li>Следуйте инструкциям на устройстве (приложите палец 2 раза)</li>
+                    <li>После успешной регистрации отпечаток будет сохранён в системе</li>
+                </ol>
+            </div>
+
+            <div id="fingerprintStatus" style="display: none; background: var(--info-light); padding: var(--spacing-md); border-radius: var(--border-radius); margin: var(--spacing-md) 0; border: 1px solid var(--info); color: var(--info);">
+                <strong>Статус:</strong> <span id="fingerprintStatusText">Ожидание регистрации...</span>
+            </div>
+
+            <div id="fingerprintCurrentStatus" style="margin: var(--spacing-md) 0; padding: var(--spacing-md); background: var(--bg-tertiary); border-radius: var(--border-radius); border: 1px solid var(--border-color);">
+                <p style="margin: 0; color: var(--text-secondary);">
+                    <strong>Текущий статус:</strong>
+                    <span id="fingerprintHasStatus"></span>
+                </p>
+            </div>
+
+            <div style="display: flex; gap: var(--spacing-sm); margin-top: var(--spacing-lg);">
+                <button class="btn btn-danger" id="deleteFingerprintBtn" onclick="deleteFingerprint()" style="display: none;">
+                    Удалить отпечаток
+                </button>
+                <button class="btn btn-secondary" onclick="closeModal('fingerprintModal')">
+                    Закрыть
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/toast.js"></script>
+    <script src="/static/admin_panel.js?v=3"></script>
+</body>
+</html>
+

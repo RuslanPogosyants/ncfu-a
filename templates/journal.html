@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Журнал посещаемости</title>
+    <link rel="stylesheet" href="/static/global.css">
+    <style>
+        body {
+            background: var(--bg-primary);
+            min-height: 100vh;
+            margin: 0;
+            padding: var(--spacing-lg);
+        }
+
+        /* Header */
+        .header {
+            background: var(--bg-secondary);
+            padding: var(--spacing-lg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            margin-bottom: var(--spacing-lg);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: var(--font-size-xl);
+            font-family: var(--font-family-mono);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: var(--font-weight-bold);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            font-family: var(--font-family-mono);
+            font-size: var(--font-size-sm);
+        }
+
+        /* Controls */
+        .controls {
+            background: var(--bg-secondary);
+            padding: var(--spacing-lg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .control-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--spacing-md);
+        }
+
+        label {
+            display: block;
+            margin-bottom: var(--spacing-sm);
+            color: var(--text-secondary);
+            font-weight: var(--font-weight-semibold);
+            font-size: var(--font-size-xs);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Table */
+        .journal-container {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        .journal-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px;
+        }
+
+        .journal-table th,
+        .journal-table td {
+            border: 1px solid var(--border-color);
+            padding: var(--spacing-sm);
+            text-align: center;
+            font-size: var(--font-size-sm);
+        }
+
+        .journal-table th {
+            background: var(--gray-800);
+            color: var(--text-inverse);
+            font-weight: var(--font-weight-bold);
+            font-size: var(--font-size-xs);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .journal-table .student-name {
+            text-align: left;
+            font-weight: var(--font-weight-semibold);
+            background: var(--bg-tertiary);
+            min-width: 200px;
+            font-family: var(--font-family-mono);
+        }
+
+        .journal-table .group-name-cell {
+            background: var(--gray-700);
+            color: var(--text-inverse);
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            padding: var(--spacing-md) var(--spacing-sm);
+            min-width: 40px;
+            font-weight: var(--font-weight-bold);
+        }
+
+        .date-header {
+            background: var(--gray-900) !important;
+            font-family: var(--font-family-mono);
+        }
+
+        .average-cell {
+            background: var(--bg-tertiary);
+            font-weight: var(--font-weight-bold);
+            font-family: var(--font-family-mono);
+        }
+
+        .total-average {
+            background: var(--primary) !important;
+            color: var(--text-inverse) !important;
+            font-family: var(--font-family-mono);
+        }
+
+        .lesson-subheader {
+            background: var(--gray-600) !important;
+            color: var(--text-inverse);
+            font-size: var(--font-size-xs);
+            padding: var(--spacing-sm);
+        }
+
+        .clickable-lesson {
+            transition: all 150ms ease;
+        }
+
+        .clickable-lesson:hover {
+            background: var(--primary) !important;
+            transform: scale(1.02);
+            box-shadow: 0 2px 8px rgba(42, 42, 42, 0.3);
+        }
+
+        .status-cell {
+            cursor: pointer;
+            min-width: 60px;
+            height: 40px;
+            transition: background 100ms ease;
+        }
+
+        .status-cell:hover {
+            background: var(--gray-100);
+        }
+
+        .status-input {
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            border: none;
+            font-size: var(--font-size-sm);
+            font-weight: var(--font-weight-bold);
+            background: transparent;
+            cursor: pointer;
+            font-family: var(--font-family-mono);
+        }
+
+        .status-input:focus {
+            outline: 2px solid var(--primary);
+        }
+
+        .status-input[readonly] {
+            cursor: not-allowed;
+            background: var(--gray-100);
+            color: var(--text-tertiary);
+        }
+
+        .status-absent {
+            color: var(--error);
+            background: var(--error-light);
+        }
+
+        .status-excused {
+            color: var(--info);
+            background: var(--info-light);
+        }
+
+        .status-auto {
+            color: var(--success);
+            background: var(--success-light);
+            font-weight: var(--font-weight-bold);
+        }
+
+        .status-fingerprint {
+            color: #9333ea;
+            background: #f3e8ff;
+            font-weight: var(--font-weight-bold);
+        }
+
+        .future-cell {
+            background: var(--warning-light);
+            border-left: 3px solid var(--warning);
+        }
+
+        .cancelled-cell {
+            background: var(--error-light);
+            text-decoration: line-through;
+            opacity: 0.6;
+        }
+
+        .no-data,
+        .loading {
+            text-align: center;
+            padding: var(--spacing-2xl);
+            color: var(--text-secondary);
+            font-family: var(--font-family-mono);
+            font-size: var(--font-size-sm);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Legend */
+        .legend {
+            position: sticky;
+            bottom: 0;
+            margin-top: var(--spacing-lg);
+            padding: var(--spacing-md);
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            display: flex;
+            gap: var(--spacing-lg);
+            flex-wrap: wrap;
+            font-size: var(--font-size-xs);
+            font-family: var(--font-family-mono);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+
+        .legend-symbol {
+            font-weight: var(--font-weight-bold);
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--border-radius);
+            font-family: var(--font-family-mono);
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+        }
+
+        .modal-content {
+            background: var(--bg-primary);
+            margin: 5% auto;
+            padding: var(--spacing-2xl);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            width: 90%;
+            max-width: 600px;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-lg);
+            padding-bottom: var(--spacing-md);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-family: var(--font-family-mono);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: var(--font-size-lg);
+        }
+
+        .close {
+            color: var(--text-tertiary);
+            font-size: 28px;
+            font-weight: var(--font-weight-bold);
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .close:hover {
+            color: var(--text-primary);
+        }
+
+        .upload-area {
+            border: 2px dashed var(--border-color-dark);
+            border-radius: var(--border-radius);
+            padding: var(--spacing-2xl);
+            text-align: center;
+            margin: var(--spacing-lg) 0;
+            cursor: pointer;
+            transition: all 100ms ease;
+            background: var(--bg-tertiary);
+            font-family: var(--font-family-mono);
+            color: var(--text-secondary);
+        }
+
+        .upload-area:hover {
+            border-color: var(--primary);
+            background: var(--bg-secondary);
+        }
+
+        .upload-area.dragging {
+            border-color: var(--primary);
+            background: var(--info-light);
+        }
+
+        #photoPreview {
+            max-width: 100%;
+            max-height: 400px;
+            margin: var(--spacing-lg) 0;
+            border: 1px solid var(--border-color);
+            display: none;
+        }
+
+        .recognition-stats {
+            background: var(--bg-tertiary);
+            padding: var(--spacing-md);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            margin-top: var(--spacing-md);
+            font-family: var(--font-family-mono);
+            font-size: var(--font-size-sm);
+        }
+
+        .recognition-stats h3 {
+            margin: 0 0 var(--spacing-sm) 0;
+            font-size: var(--font-size-md);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            padding: var(--spacing-xs) 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .stat-item:last-child {
+            border-bottom: none;
+        }
+
+        .date-hint {
+            display: block;
+            font-size: var(--font-size-xs);
+            margin-top: var(--spacing-sm);
+            padding: var(--spacing-sm);
+            background: var(--bg-tertiary);
+            border-left: 2px solid var(--info);
+            font-family: var(--font-family-mono);
+            color: var(--text-secondary);
+        }
+
+        .date-hint.warning {
+            background: var(--warning-light);
+            border-left-color: var(--warning);
+            color: var(--warning);
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Журнал посещаемости</h1>
+        <div class="user-info">
+            <span id="userName">Loading...</span>
+            <button class="btn btn-secondary" onclick="window.location.href='/dashboard'">Панель</button>
+            <button class="btn btn-secondary" onclick="window.location.href='/schedule'">Расписание</button>
+            <button class="btn btn-secondary" id="adminPanelBtn" onclick="window.location.href='/admin'" style="display: none;">Админ</button>
+            <button class="btn btn-danger btn-sm" onclick="logout()">Выход</button>
+        </div>
+    </div>
+
+    <div class="controls">
+        <div class="control-group">
+            <div class="form-group">
+                <label for="groupSelect">Группа</label>
+                <select id="groupSelect" class="form-select">
+                    <option value="">Выберите группу</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="disciplineSelect">Дисциплина</label>
+                <select id="disciplineSelect" class="form-select" disabled>
+                    <option value="">Сначала выберите группу</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="studentSearch">Поиск студента</label>
+                <input type="text" id="studentSearch" class="form-input" placeholder="Введите имя..."
+                       oninput="searchInTable(this.value)">
+            </div>
+            <div class="form-group">
+                <label>&nbsp;</label>
+                <button class="btn btn-primary" id="uploadPhotoBtn" style="display: none;">
+                    Загрузить фото
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="journal-container">
+        <div id="loading" class="loading" style="display: none;">Загрузка журнала...</div>
+        <div id="noData" class="no-data">Выберите группу и дисциплину для отображения журнала</div>
+        <div class="table-wrapper">
+            <table class="journal-table" id="journalTable" style="display: none;">
+                <thead id="tableHead"></thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="legend">
+        <div class="legend-item">
+            <span class="legend-symbol status-absent">Н</span>
+            <span>Отсутствует</span>
+        </div>
+        <div class="legend-item">
+            <span class="legend-symbol status-excused">У</span>
+            <span>Уважительная</span>
+        </div>
+        <div class="legend-item">
+            <span class="legend-symbol status-auto">Ф</span>
+            <span>Фото</span>
+        </div>
+        <div class="legend-item">
+            <span class="legend-symbol status-fingerprint">О</span>
+            <span>Отпечаток</span>
+        </div>
+    </div>
+
+    <!-- Upload Modal -->
+    <div id="uploadModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Загрузить фото</h2>
+                <span class="close">&times;</span>
+            </div>
+
+            <div class="form-group">
+                <label for="selectDate">Выберите дату:</label>
+                <input type="date" id="selectDate" class="form-input">
+                <small class="date-hint" id="dateHint">
+                    Выберите дату для просмотра доступных занятий
+                </small>
+            </div>
+
+            <div id="selectScheduleGroup" class="form-group" style="display: none;">
+                <label for="selectSchedule">Выберите занятие:</label>
+                <select id="selectSchedule" class="form-select">
+                    <option value="">Выберите занятие</option>
+                </select>
+            </div>
+
+            <div class="upload-area" id="uploadArea" style="display: none;">
+                <p>Перетащите фото сюда или кликните для выбора</p>
+            </div>
+            <img id="photoPreview" alt="Предпросмотр">
+            <div id="recognitionStats" class="recognition-stats" style="display: none;">
+                <h3>Результаты распознавания</h3>
+                <div class="stat-item">
+                    <span>Распознано студентов:</span>
+                    <strong id="recognizedCount">-</strong>
+                </div>
+                <div class="stat-item">
+                    <span>Всего лиц на фото:</span>
+                    <strong id="totalFaces">-</strong>
+                </div>
+                <div class="stat-item">
+                    <span>Процент распознавания:</span>
+                    <strong id="recognitionRate">-</strong>
+                </div>
+            </div>
+            <button id="recognizeBtn" class="btn btn-primary" style="width: 100%; margin-top: var(--spacing-md);" disabled>
+                Распознать и отметить посещаемость
+            </button>
+        </div>
+    </div>
+
+    <input type="file" id="photoInput" accept="image/*" style="display: none;">
+
+    <script src="/static/toast.js"></script>
+    <script src="/static/admin.js?v=2"></script>
+</body>
+</html>
