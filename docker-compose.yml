@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: ncfu_db
+    environment:
+      POSTGRES_USER: ncfu
+      POSTGRES_PASSWORD: ncfu_password
+      POSTGRES_DB: ncfu_attendance
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - ncfu_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ncfu"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build: .
+    container_name: ncfu_server
+    volumes:
+      - .:/app
+      - ./data:/app/data
+    environment:
+      - PYTHONUNBUFFERED=1
+      - DATABASE_URL=postgresql://ncfu:ncfu_password@db:5432/ncfu_attendance
+      - SECRET_KEY=change-me-in-production
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - ncfu_network
+    restart: unless-stopped
+
+  nginx:
+    image: logistics_nginx:latest
+    container_name: ncfu_nginx
+    ports:
+      - "8090:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - web
+    networks:
+      - ncfu_network
+    restart: unless-stopped
+
+networks:
+  ncfu_network:
+    driver: bridge
+
+volumes:
+  postgres_data:
